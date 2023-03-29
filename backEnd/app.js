@@ -8,7 +8,7 @@ import { fileTypeFromBuffer } from 'file-type';   // für Bilder Buffern
 
 
 // import files aus funktionen.js
-import { loadFile, saveFile     } from './funktionen.js'
+import { loadFile, appendFile     } from './funktionen.js'
 
 
 
