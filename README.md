@@ -6,5 +6,5 @@
 ## Starten von Server + Vite
 - *in root HauptOrdner gehen*
 
-- [ ] npm i
-- [ ] **npm run start** 
+<p>- [ ] npm i </p>
+<p style="color:red; font-size:1.2rem" > - [ ] npm run start </p>
