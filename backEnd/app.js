@@ -9,6 +9,7 @@ import cors from 'cors';        // für CORS Sicherheit
 import multer from 'multer';    // für Bilder 
 import { fileTypeFromBuffer } from 'file-type';   // für Bilder in Buffer / Memory
 import fs from 'fs';            // für Bilder
+import {v4 as uuidv4 } from 'uuid';  // für Post uuid
 
 
 // *** import      files aus funktionen.js
@@ -59,8 +60,7 @@ app.use(cors({ origin: 'http://localhost:5173' }))
  *** ****************************************************************/
 // **** images
 app.use("/images", express.static("./images"))
-// **** admin Seite?
-// **** Detail Seite?
+// **** admin Seite?   selbst dann in in React
 
 
 
@@ -78,26 +78,90 @@ app.get("/api/v1/getPost", (req, res) => {
 })
 
 
+
+
 /** ****************************************************************
  * 
- * * **** GET       fetch       sucht nach  ID  Post
- * 
+ * * **** GET       fetch       sucht nach  ID  Post   Nr im Array []
+ * * **** Detail Seite?  selbst dann in React
+*
  *** ****************************************************************/
-app.get("/api/v1/getPost/:id", (req, res) => {
+app.get("/api/v1/suchtPost/:id", (req, res) => {
     const { id } = req.params
     console.log(id)
 
     loadFile()
-        .then(data => res.json(data[id-1]))  // da Array ja bei 0 beginnt, der Counter aber den ersten Post mit 1 macht
-      
-
+        .then(data =>  res.json(data[id-1]))
 
         .catch(err => () => console.log(err))
-
 })
 
+/** ****************************************************************
+ * 
+ * * **** GET       fetch       suchen mit find()      
+ *                              * gibt nur eine Ergebnis zurück
+*
+ *** ****************************************************************/
+app.get("/api/v1/findPost/:id", (req, res) => {
+    const { id } = req.params
+    console.log(id)
+    loadFile()
+        .then(data => {
+            const post = data.find(post => post.ID == id)
 
+            // * =    if(post === false)
+            if (!post) { 
+                return res.status(404).json({ Antwort: "Post nicht gefunden" })
+            }
+            res.json(post)
+        })
+})
 
+/** ****************************************************************
+ * 
+ * * **** GET       fetch       suchen mit filter()      
+ *                              * gibt nur    mehrere   Ergebnis zurück
+*                               * z.B. name
+ *** ****************************************************************/
+app.get("/api/v1/filterPost/:id", (req, res) => {
+    const { id } = req.params
+    console.log(id)
+    loadFile()
+        .then(data => {
+            const post = data.filter(post => post.name == id)
+
+            // * =     if(post === false)
+            if (!post) {    
+                return res.status(404).json({ KeineAntworten: "Suchen nicht gefunden" })
+            }
+            res.json(post)
+        })
+})
+
+/** ****************************************************************
+ * 
+ * * **** GET       fetch       suchen mit filter()      
+ *                              * gibt nur    mehrere   Ergebnis zurück
+*                               * z.B. name
+ *** ****************************************************************/
+app.get("/api/v1/allesFilterSuchePost/:id", (req, res) => {
+    const { id } = req.params
+    console.log(id)
+    loadFile()
+        .then(data => {
+            const post = data.filter(post => {
+                if(post.name == id || post.ID == id || post.titel == id || post.time == id || post.text == id || post.image == id || post.uuid == id){
+                    return data
+                }
+                                })
+
+            // * =     if(post === false)
+            if (!post) {    
+                return res.status(404).json({ KeineAntworten: "Suchen nicht gefunden" })
+            }
+            res.json(post)
+        })
+})
 
 /** ****************************************************************
  * 
@@ -128,9 +192,20 @@ app.post("/api/v1/addPost", upload.single("postImage"), (req, res) => {
                         // Bild zum bestehenden Objekt data hinzufügen    
                         data.image = filename
                         console.log(data)
+
+                        // ** ID counter für die verschiedenen Posts 
                         console.log(count_id_POST)
                         count_id_POST++
-                        data.id = count_id_POST
+                        data.ID = count_id_POST
+
+                        // ** Zeitstempel für die Posts
+                        let time_time = new Date()
+                        data.time = time_time
+
+                        // ! uuid
+                        // ** Post uuid 
+                        const uuid = uuidv4()
+                        data.uuid = uuid
 
                         // ** jetzt ganze data Objekt ins fs schreiben   in die db_Posts.json
                         appendFile(data)

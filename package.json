@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "concurrently": "^8.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "npm run dev --prefix backEnd",
+    "client": "npm run dev --prefix frontEnd",
+    "start": "concurrently --kill-others-on-fail \"npm run server\" \" npm run client\"",
+    "install":"concurrently \"npm i --prefix frontEnd\" \" npm i --prefix backEnd\""
+  }
+}

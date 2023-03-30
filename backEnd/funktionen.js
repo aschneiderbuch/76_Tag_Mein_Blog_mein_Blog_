@@ -63,6 +63,13 @@ export const appendFile = (newPost) => {
 
             .catch(err => reject(`--> Fehler loadFile ${err}`))
     })
-
-
 }
+
+
+/** ****************************************************************
+ * 
+ * * **** appendFile   hinzufügen       
+ * 
+ *  loadFile ()  dann -> saveFile ()
+ * 
+ *** ****************************************************************/
