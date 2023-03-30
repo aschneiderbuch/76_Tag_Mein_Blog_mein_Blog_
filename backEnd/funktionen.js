@@ -2,7 +2,7 @@ import fs from 'fs'
 
 /** ****************************************************************
  * 
- * * **** loadFile
+ * * **** loadFile              readFile
  * 
  *** ****************************************************************/
 export const loadFile = () => {
@@ -21,7 +21,7 @@ export const loadFile = () => {
 
 /** ****************************************************************
  * 
- * * **** saveFile
+ * * **** saveFile              writeFile
  * 
  *** ****************************************************************/
 export const saveFile = (data) => {
@@ -41,7 +41,7 @@ export const saveFile = (data) => {
 
 /** ****************************************************************
  * 
- * * **** appendFile   hinzufügen
+ * * **** appendFile   hinzufügen       
  * 
  *  loadFile ()  dann -> saveFile ()
  * 
