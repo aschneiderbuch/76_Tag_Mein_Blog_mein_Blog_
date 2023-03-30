@@ -76,42 +76,59 @@ app.use("/images", express.static("./images"))
 
 
 
+
+
+
 /** ****************************************************************
  * 
  * * **** POST
+ *  ! sollte ID haben wenn er kommt, zwecks Detail Seite    Route :id und mit param 
  * 
  *** ****************************************************************/
-// ** Prüfung Datei Endung             im Buffer, bevor es ins fs geschrieben wird
-fileTypeFromBuffer(req.file.buffer)
-    .then(result => {
-        if (result.ext === 'png' || result.ext === 'jpeg' || result.ext === 'jpg') {
+// * upload.single lädt Middleware für multer    lädt das Einzelne Bild/Image mit !wichtig"postImage"-muss auch im FrontEnd so sein 
+// * dann wird der rest vom POST Endpunkt weiter geladen /api/v1/addPost
+app.post("api/v1/addPost", upload.single("postImage"), (req, res) => { 
+    const data = req.body 
+    console.log(data)
 
-            // dadurch bekommt er Einzigartigen Faktor, da in Millisekunden 
-            let filename = new Date().getTime()
-            filename += '.' + result.ext
+    // ** Prüfung Datei Endung             im Buffer, bevor es ins fs geschrieben wird
+    fileTypeFromBuffer(req.file.buffer)
+        .then(result => {
+            if (result.ext === 'png' || result.ext === 'jpeg' || result.ext === 'jpg') {
 
-            // Bilder ins fs schreiben 
-            fs.writeFile('./images/' + filename, req.file.buffer, (err) => {
-                if (err) console.log(err)
-                else {
+                // dadurch bekommt er Einzigartigen Faktor, da in Millisekunden 
+                let filename = new Date().getTime()
+                filename += '.' + result.ext
 
-                    // Bild zum bestehenden Objekt data hinzufügen    
-                    data.image = filename
-                    console.log(data)
+                // Bilder ins fs schreiben 
+                fs.writeFile('./images/' + filename, req.file.buffer, (err) => {
+                    if (err) console.log(err)
+                    else {
 
-                    // ** jetzt ganze data Objekt ins fs schreiben   in die db_Posts.json
+                        // Bild zum bestehenden Objekt data hinzufügen    
+                        data.image = filename
+                        console.log(data)
 
-                }
-            })
+                        // ** jetzt ganze data Objekt ins fs schreiben   in die db_Posts.json
+                        appendFile(data)
+                            .then(newData => res.json(newData))
+                            .catch(err => console.log(err))
+                        console.log(req.file)
+                    }
+                })
 
-        }
-        else {
-            result.status(418).end()  // gehört zur if Prüfung Datei Endung
-        }
-    })
-    .catch(err => () => {
-        console.log(err)
-    })
+            }
+            else {
+                result.status(418).end()  // gehört zur if Prüfung Datei Endung
+            }
+        })
+        .catch(err => () => {
+            console.log(err)
+        })
+
+})
+
+
 
 /** ****************************************************************
  * 
