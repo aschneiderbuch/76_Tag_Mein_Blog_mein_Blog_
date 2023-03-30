@@ -88,7 +88,7 @@ app.get("/api/v1/getPost", (req, res) => {
  * * **** Detail Seite?  selbst dann in React
 *
  *** ****************************************************************/
-app.get("/api/v1/suchtPost/:id", (req, res) => {
+app.get("/api/v1/suchPost/:id", (req, res) => {
     const { id } = req.params
     console.log(id)
 
