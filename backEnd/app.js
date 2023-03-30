@@ -23,6 +23,8 @@ import { loadFile, appendFile } from './funktionen.js'
  *** ****************************************************************/
 const PORT = 9999
 const app = express()
+let count_id_POST = 0
+
 
 /** ****************************************************************
  * 
@@ -49,8 +51,7 @@ app.use(morgan('dev'))
 app.use(cors({ origin: 'http://localhost:5173' }))
 
 // **** React HEAD BODY JSON Parser
-app.use(express.json())
-
+/* app.use(express.json()) */
 /** ****************************************************************
  * 
  * * ************** static Routes 
@@ -62,33 +63,52 @@ app.use("/images", express.static("./images"))
 // **** Detail Seite?
 
 
+
 /** ****************************************************************
  * 
- * * ************** für fetches
+ * * **** GET       fetch       ALLE  Post
  * 
  *** ****************************************************************/
+app.get("/api/v1/getPost", (req, res) => {
+
+    loadFile()
+        .then(data => res.json(data))
+
+        .catch(err => () => console.log(err))
+})
+
 
 /** ****************************************************************
  * 
- * * **** GET
+ * * **** GET       fetch       sucht nach  ID  Post
  * 
  *** ****************************************************************/
+app.get("/api/v1/getPost/:id", (req, res) => {
+    const { id } = req.params
+    console.log(id)
+
+    loadFile()
+        .then(data => res.json(data[id-1]))  // da Array ja bei 0 beginnt, der Counter aber den ersten Post mit 1 macht
+      
 
 
+        .catch(err => () => console.log(err))
+
+})
 
 
 
 
 /** ****************************************************************
  * 
- * * **** POST
+ * * **** POST          fetch
  *  ! sollte ID haben wenn er kommt, zwecks Detail Seite    Route :id und mit param 
  * 
  *** ****************************************************************/
 // * upload.single lädt Middleware für multer    lädt das Einzelne Bild/Image mit !wichtig"postImage"-muss auch im FrontEnd so sein 
 // * dann wird der rest vom POST Endpunkt weiter geladen /api/v1/addPost
-app.post("api/v1/addPost", upload.single("postImage"), (req, res) => { 
-    const data = req.body 
+app.post("/api/v1/addPost", upload.single("postImage"), (req, res) => {
+    const data = req.body
     console.log(data)
 
     // ** Prüfung Datei Endung             im Buffer, bevor es ins fs geschrieben wird
@@ -108,6 +128,9 @@ app.post("api/v1/addPost", upload.single("postImage"), (req, res) => {
                         // Bild zum bestehenden Objekt data hinzufügen    
                         data.image = filename
                         console.log(data)
+                        console.log(count_id_POST)
+                        count_id_POST++
+                        data.id = count_id_POST
 
                         // ** jetzt ganze data Objekt ins fs schreiben   in die db_Posts.json
                         appendFile(data)
@@ -132,7 +155,7 @@ app.post("api/v1/addPost", upload.single("postImage"), (req, res) => {
 
 /** ****************************************************************
  * 
- * * **** PUT   ändern
+ * * **** PUT   ändern      fetch
  * 
  *** ****************************************************************/
 
@@ -149,3 +172,4 @@ app.post("api/v1/addPost", upload.single("postImage"), (req, res) => {
 app.listen(PORT, () => {
     console.log("Server läuft auf Port: " + PORT)
 })
+

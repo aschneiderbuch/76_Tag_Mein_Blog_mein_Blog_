@@ -8,7 +8,7 @@ import fs from 'fs'
 export const loadFile = () => {
     // Promise für fetch
     return new Promise((resolve, reject) => {
-        // liest Datei ./dpPosts.json
+        // liest Datei ./dp_Posts.json
         fs.readFile('./db_Posts.json', (err, data) => {
             if (err) reject(err)
             else {
