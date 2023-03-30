@@ -9,11 +9,11 @@ import cors from 'cors';        // für CORS Sicherheit
 import multer from 'multer';    // für Bilder 
 import { fileTypeFromBuffer } from 'file-type';   // für Bilder in Buffer / Memory
 import fs from 'fs';            // für Bilder
-import {v4 as uuidv4 } from 'uuid';  // für Post uuid
+import { v4 as uuidv4 } from 'uuid';  // für Post uuid
 
 
 // *** import      files aus funktionen.js
-import { loadFile, appendFile } from './funktionen.js'
+import { loadFile, appendFile, counterFunktion } from './funktionen.js'
 
 
 
@@ -24,7 +24,6 @@ import { loadFile, appendFile } from './funktionen.js'
  *** ****************************************************************/
 const PORT = 9999
 const app = express()
-let count_id_POST = 0
 
 
 /** ****************************************************************
@@ -36,6 +35,9 @@ const upload = multer({
     storage: multer.memoryStorage(),   // für Magic Bite zum filtern von DateiEndungen
     limits: { fileSize: 200000 }        // image Bild Größe begrenzen
 })
+const BILD_FORMAT_1 = 'jpg'
+const BILD_FORMAT_2 = 'jpeg'
+const BILD_FORMAT_3 = 'png'
 
 
 
@@ -91,7 +93,8 @@ app.get("/api/v1/suchtPost/:id", (req, res) => {
     console.log(id)
 
     loadFile()
-        .then(data =>  res.json(data[id-1]))
+        // * -0 könnt auch weg, da counterFunkion auch bei 0 zählen anfängt
+        .then(data => res.json(data[id - 0]))
 
         .catch(err => () => console.log(err))
 })
@@ -110,7 +113,7 @@ app.get("/api/v1/findPost/:id", (req, res) => {
             const post = data.find(post => post.ID == id)
 
             // * =    if(post === false)
-            if (!post) { 
+            if (!post) {
                 return res.status(404).json({ Antwort: "Post nicht gefunden" })
             }
             res.json(post)
@@ -131,7 +134,7 @@ app.get("/api/v1/filterPost/:id", (req, res) => {
             const post = data.filter(post => post.name == id)
 
             // * =     if(post === false)
-            if (!post) {    
+            if (!post) {
                 return res.status(404).json({ KeineAntworten: "Suchen nicht gefunden" })
             }
             res.json(post)
@@ -150,13 +153,13 @@ app.get("/api/v1/allesFilterSuchePost/:id", (req, res) => {
     loadFile()
         .then(data => {
             const post = data.filter(post => {
-                if(post.name == id || post.ID == id || post.titel == id || post.time == id || post.text == id || post.image == id || post.uuid == id){
+                if (post.name == id || post.ID == id || post.titel == id || post.time == id || post.text == id || post.image == id || post.uuid == id) {
                     return data
                 }
-                                })
+            })
 
             // * =     if(post === false)
-            if (!post) {    
+            if (!post) {
                 return res.status(404).json({ KeineAntworten: "Suchen nicht gefunden" })
             }
             res.json(post)
@@ -178,7 +181,7 @@ app.post("/api/v1/addPost", upload.single("postImage"), (req, res) => {
     // ** Prüfung Datei Endung             im Buffer, bevor es ins fs geschrieben wird
     fileTypeFromBuffer(req.file.buffer)
         .then(result => {
-            if (result.ext === 'png' || result.ext === 'jpeg' || result.ext === 'jpg') {
+            if (result.ext === BILD_FORMAT_1 || result.ext === BILD_FORMAT_2 || result.ext === BILD_FORMAT_3) {
 
                 // dadurch bekommt er Einzigartigen Faktor, da in Millisekunden 
                 let filename = new Date().getTime()
@@ -194,24 +197,29 @@ app.post("/api/v1/addPost", upload.single("postImage"), (req, res) => {
                         console.log(data)
 
                         // ** ID counter für die verschiedenen Posts 
-                        console.log(count_id_POST)
-                        count_id_POST++
-                        data.ID = count_id_POST
+                        counterFunktion()
+                            .then(id => {
+                                data.ID = id
 
-                        // ** Zeitstempel für die Posts
-                        let time_time = new Date()
-                        data.time = time_time
+                                // ** Zeitstempel für die Posts
+                                let time_time = new Date()
+                                data.time = time_time
 
-                        // ! uuid
-                        // ** Post uuid 
-                        const uuid = uuidv4()
-                        data.uuid = uuid
+                                // ! uuid
+                                // ** Post uuid 
+                                const uuid = uuidv4()
+                                data.uuid = uuid
 
-                        // ** jetzt ganze data Objekt ins fs schreiben   in die db_Posts.json
-                        appendFile(data)
-                            .then(newData => res.json(newData))
-                            .catch(err => console.log(err))
-                        console.log(req.file)
+                                // ** jetzt ganze data Objekt ins fs schreiben   in die db_Posts.json
+                                appendFile(data)
+                                    .then(newData => res.json(newData))
+                                    .catch(err => console.log(err))
+                                console.log(req.file)
+
+                            })
+
+
+
                     }
                 })
 

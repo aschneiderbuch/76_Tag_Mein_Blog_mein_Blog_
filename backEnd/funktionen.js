@@ -1,4 +1,15 @@
+/** ****************************************************************
+ * 
+ * * ************* imports
+ * 
+ *** ****************************************************************/
 import fs from 'fs'
+import { constants } from 'fs/promises'
+
+
+
+
+
 
 /** ****************************************************************
  * 
@@ -68,8 +79,49 @@ export const appendFile = (newPost) => {
 
 /** ****************************************************************
  * 
- * * **** appendFile   hinzufügen       
- * 
- *  loadFile ()  dann -> saveFile ()
+ * * **** counter   hochzählen       
+ * * erzeugt counter Datei und zählt bei jedem Post hoch
+ *          * prüft erzeugt Datei, lädt, zählt hoch schreibt
  * 
  *** ****************************************************************/
+export const counterFunktion = () => {
+    // Promise
+    return new Promise((resolve, reject) => {
+
+        // * prüft ob Datei existiert
+        fs.access('./counter.txt', constants.F_OK, (err) => {
+            if (err) {
+                // * erzeugt Datei, wenn nicht vorhanden mit Anfangswert
+                fs.writeFile('./counter.txt', '0', 'utf-8', (err) => {
+                    if (err) reject(err)
+                    else {
+                        resolve(0)
+                    }
+                })
+            }
+            else {
+                // * wenn da, dann lesen
+                fs.readFile('./counter.txt', 'utf-8', (err, data) => {
+                    if (err) reject(err)
+                    else {
+                        let count = parseInt(data)
+
+                        // * hochzählen
+                        count++
+
+                        // * in Datei schreiben
+                        fs.writeFile('./counter.txt', count.toString(), 'utf-8', (err) => {
+                            if (err) reject(err)
+                            else {
+
+                                console.log(count)
+                                resolve(count)
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    })
+}
+
